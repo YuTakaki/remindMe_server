@@ -1,6 +1,8 @@
 from django.shortcuts import render
+from rest_framework import permissions
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User
 from .serializers import LoginSerializer, RegisterSerializer
@@ -30,12 +32,24 @@ class LoginView(GenericAPIView):
     return User.objects.filter()
     
   def post(self, request):
-    print(request.data['username'])
-    print()
-    return Response([])
+    username = request.data['username']
+    password = request.data['password']
+    user = User.objects.filter(username=username).first()
+    if user is None:
+      raise AuthenticationFailed({"error" : "No user exist"})
+    if not user.check_password(password):
+      raise AuthenticationFailed({"error" : "Wrong password"})
+    refresh = RefreshToken.for_user(user)
+    serializer = RegisterSerializer(user)
+    return Response({
+      'user': serializer.data,
+      'token': str(refresh.access_token),
+    })
+
 
 class UserView(GenericAPIView):
   serializer_class = RegisterSerializer
+  permission_classes = [permissions.IsAuthenticated]
 
   def get(self, request):
     user = self.get_serializer(request.user)
