@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
-
+from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User
 from .serializers import LoginSerializer, RegisterSerializer
 
@@ -14,10 +14,12 @@ class RegisterView(GenericAPIView):
   def post(self, request):
     serializer = self.get_serializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    serializer.save()
-    print(serializer)
-
-    return Response(serializer.data)
+    user = serializer.save()
+    refresh = RefreshToken.for_user(user)
+    return Response({
+      'user': serializer.data,
+      'token': str(refresh.access_token),
+    })
 
 
 class LoginView(GenericAPIView):
@@ -25,14 +27,16 @@ class LoginView(GenericAPIView):
   serializer_class = LoginSerializer
 
   def get_queryset(self):
-    print(self)
     return User.objects.filter()
-  
     
   def post(self, request):
     print(request.data['username'])
-    # serializer = self.get_serializer(request.data)
-    # serializer.is_valid(raise_exception=True)
-    # serializer.save()
-    # print(serializer)
+    print()
     return Response([])
+
+class UserView(GenericAPIView):
+  serializer_class = RegisterSerializer
+
+  def get(self, request):
+    user = self.get_serializer(request.user)
+    return Response(user.data)

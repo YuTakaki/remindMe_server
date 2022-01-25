@@ -9,8 +9,19 @@ class RegisterSerializer(ModelSerializer):
     extra_kwargs = {
       "id" : {
         "read_only": True
+      },
+      "password" : {
+        "write_only": True
       }
     }
+
+  def create(self, data):
+    password = data.pop('password', None)
+    instance = self.Meta.model(**data)
+    if password is not None:
+      instance.set_password(password)
+      instance.save()
+    return instance
 
 class LoginSerializer(ModelSerializer):
   class Meta:
