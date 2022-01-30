@@ -4,6 +4,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.db.models import Q
 from .models import User
 from .serializers import LoginSerializer, RegisterSerializer
 
@@ -32,9 +33,9 @@ class LoginView(GenericAPIView):
     return User.objects.filter()
     
   def post(self, request):
-    username = request.data['username']
+    username = request.data['usernameOrEmail']
     password = request.data['password']
-    user = User.objects.filter(username=username).first()
+    user = User.objects.filter(Q(username=username) | Q(email=username)).first()
     if user is None:
       raise AuthenticationFailed({"error" : "No user exist"})
     if not user.check_password(password):
@@ -47,7 +48,7 @@ class LoginView(GenericAPIView):
     })
 
 
-class UserView(GenericAPIView):
+class UserCheckView(GenericAPIView):
   serializer_class = RegisterSerializer
   permission_classes = [permissions.IsAuthenticated]
 
