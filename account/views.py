@@ -33,13 +33,13 @@ class LoginView(GenericAPIView):
     return User.objects.filter()
     
   def post(self, request):
-    username = request.data['usernameOrEmail']
+    usernameOrEmail = request.data['usernameOrEmail']
     password = request.data['password']
-    user = User.objects.filter(Q(username=username) | Q(email=username)).first()
+    user = User.objects.filter(Q(username=usernameOrEmail) | Q(email=usernameOrEmail)).first()
     if user is None:
-      raise AuthenticationFailed({"error" : "No user exist"})
+      raise AuthenticationFailed({"error" : {"usernameOrEmail" : "username/email does not exist"}})
     if not user.check_password(password):
-      raise AuthenticationFailed({"error" : "Wrong password"})
+      raise AuthenticationFailed({"error" : {"password" : "Wrong password"}})
     refresh = RefreshToken.for_user(user)
     serializer = RegisterSerializer(user)
     return Response({
@@ -50,8 +50,9 @@ class LoginView(GenericAPIView):
 
 class UserCheckView(GenericAPIView):
   serializer_class = RegisterSerializer
-  permission_classes = [permissions.IsAuthenticated]
 
   def get(self, request):
-    user = self.get_serializer(request.user)
-    return Response(user.data)
+    username = request.GET.get('username')
+    email = request.GET.get('email')
+    user = User.objects.filter(Q(username = username) | Q(email = email)).first()
+    return Response(True) if user is None else Response(False)
