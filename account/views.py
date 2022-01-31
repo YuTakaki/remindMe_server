@@ -56,3 +56,12 @@ class UserCheckView(GenericAPIView):
     email = request.GET.get('email')
     user = User.objects.filter(Q(username = username) | Q(email = email)).first()
     return Response(True) if user is None else Response(False)
+
+class UserView(GenericAPIView):
+  serializer_class = RegisterSerializer
+  permission_classes = [permissions.IsAuthenticated]
+
+  def get(self, request):
+    print(request)
+    serializer = self.serializer_class(request.user)
+    return Response(serializer.data)
