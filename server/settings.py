@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'account.apps.AccountConfig',
+    'reminders.apps.RemindersConfig',
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt',
