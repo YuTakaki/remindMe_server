@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 from rest_framework.generics import GenericAPIView
 
 from account.models import User
@@ -21,6 +21,7 @@ class ReminderView(GenericAPIView):
     return Response(serialize_data.data)
 
   def get(self, request):
-    reminder = Reminder.objects.filter(date__gte = datetime.date.today())
+    reminder = Reminder.objects.filter(date__gte = date.today())
     print(reminder)
-    return Response(True)
+    serialize = self.get_serializer(reminder, many=True)
+    return Response(serialize.data)
