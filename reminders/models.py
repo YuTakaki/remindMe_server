@@ -7,7 +7,7 @@ from account.models import User
 class Reminder(models.Model):
   title = models.CharField(max_length=100)
   start_time = models.TimeField()
-  end_time = models.TimeField()
+  end_time = models.TimeField(null=True)
   date = models.DateField()
   favorite = models.BooleanField(default=False)
   note = models.TextField()

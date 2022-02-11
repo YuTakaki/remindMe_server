@@ -21,7 +21,15 @@ class ReminderView(GenericAPIView):
     return Response(serialize_data.data)
 
   def get(self, request):
-    reminder = Reminder.objects.filter(date__gte = date.today())
-    print(reminder)
+    reminder = Reminder.objects.filter(date__gte = date.today(), user=request.user)
+    serialize = self.get_serializer(reminder, many=True)
+    return Response(serialize.data)
+
+class ReminderTodayView(GenericAPIView):
+  serializer_class = ReminderSerializer
+  permission_classes = [permissions.IsAuthenticated]
+
+  def get(self, request):
+    reminder = Reminder.objects.filter(date = date.today(), user=request.user)
     serialize = self.get_serializer(reminder, many=True)
     return Response(serialize.data)
