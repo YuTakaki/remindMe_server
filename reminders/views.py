@@ -21,9 +21,16 @@ class ReminderView(GenericAPIView):
 
   def get(self, request, pk):
     reminder = {
-      'today' : Reminder.objects.filter(date = date.today(), user=request.user),
-      'upcomming-events': Reminder.objects.filter(date__gte = date.today(), user=request.user),
-      'important': Reminder.objects.filter(favorite = True, user=request.user)
+      'today' : Reminder.objects.filter(date = date.today(), user=request.user).order_by('start_time'),
+      'upcomming-events': Reminder.objects.filter(date__gte = date.today(), user=request.user).order_by('date'),
+      'important': Reminder.objects.filter(favorite = True, user=request.user).order_by('start_time')
     }
     serialize = self.get_serializer(reminder[pk], many=True)
     return Response(serialize.data)
+
+  def put(self, request, pk):
+    reminder = Reminder.objects.get(pk=pk)
+    reminder.favorite = not reminder.favorite
+    reminder.save()
+    serializer = self.get_serializer(reminder)
+    return Response(serializer.data)

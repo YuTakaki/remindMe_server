@@ -5,4 +5,5 @@ from .views import ReminderView
 urlpatterns = [
     path('', ReminderView.as_view()),
     path('<str:pk>', ReminderView.as_view()),
+    path('<int:pk>', ReminderView.as_view()),
 ]
