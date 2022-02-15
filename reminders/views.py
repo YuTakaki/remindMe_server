@@ -28,9 +28,20 @@ class ReminderView(GenericAPIView):
     serialize = self.get_serializer(reminder[pk], many=True)
     return Response(serialize.data)
 
-  def put(self, request, pk):
+  def put(self, _, pk):
     reminder = Reminder.objects.get(pk=pk)
     reminder.favorite = not reminder.favorite
     reminder.save()
     serializer = self.get_serializer(reminder)
     return Response(serializer.data)
+
+class CalendarTaskView(GenericAPIView):
+  serializer_class = ReminderSerializer
+  permission_classes = [permissions.IsAuthenticated]
+
+  def get(self, request):
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+    tasks = Reminder.objects.filter(date__month = int(month) + 1, date__year = year)
+    serialize = self.get_serializer(tasks, many=True)
+    return Response(serialize.data)
