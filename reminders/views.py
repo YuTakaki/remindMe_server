@@ -45,3 +45,13 @@ class CalendarTaskView(GenericAPIView):
     tasks = Reminder.objects.filter(date__month = int(month) + 1, date__year = year)
     serialize = self.get_serializer(tasks, many=True)
     return Response(serialize.data)
+
+class SearchTaskView(GenericAPIView):
+  serializer_class = ReminderSerializer
+  permission_classes = [ permissions.IsAuthenticated ]
+
+  def get(self, request):
+    keyword = request.GET.get('keyword')
+    reminder = Reminder.objects.filter(title__icontains = keyword)
+    serializer = self.serializer_class(reminder, many=True)
+    return Response(serializer.data)
