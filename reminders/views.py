@@ -1,7 +1,5 @@
 from datetime import date
 from rest_framework.generics import GenericAPIView
-
-from account.models import User
 from .models import Reminder
 from .serializers import ReminderSerializer
 from rest_framework import permissions
@@ -27,6 +25,12 @@ class ReminderView(GenericAPIView):
     }
     serialize = self.get_serializer(reminder[pk], many=True)
     return Response(serialize.data)
+
+  def delete(self, _, pk):
+    reminder_to_delete = Reminder.objects.get(pk=pk)
+    reminder_to_delete.delete()
+    return Response(True)
+
 
   def put(self, _, pk):
     reminder = Reminder.objects.get(pk=pk)
